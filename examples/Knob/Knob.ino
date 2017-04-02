@@ -8,7 +8,7 @@
  modified for the ESP32 on March 2017
  by John Bennett
  
- see  http://www.arduino.cc/en/Tutorial/Knob for a desription of the original code
+ see  http://www.arduino.cc/en/Tutorial/Knob for a description of the original code
 
  * Different servos require different pulse widths to vary servo angle, but the range is 
  * an approximately 500-2500 microsecond pulse every 20ms (50Hz). In general, hobbyist servos

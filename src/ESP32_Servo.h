@@ -30,44 +30,44 @@
 
     Servo - Class for manipulating servo motors connected to ESP32 pins.
     int attach(pin )  - Attaches the given GPIO pin to the next free channel
-		(channels that have previously been detached are used first), 
-		returns channel number or 0 if failure. All pin numbers are allowed,
-		but only pins 2,4,12-19,21-23,25-27,32-33 are recommended.
+        (channels that have previously been detached are used first), 
+        returns channel number or 0 if failure. All pin numbers are allowed,
+        but only pins 2,4,12-19,21-23,25-27,32-33 are recommended.
     int attach(pin, min, max  ) - Attaches to a pin setting min and max 
-		values in microseconds; enforced minimum min is 500, enforced max
-		is 2500. Other sematics same as attach().
+        values in microseconds; enforced minimum min is 500, enforced max
+        is 2500. Other semantics same as attach().
     void write () - Sets the servo angle in degrees; a value below 500 is
-		treated as a value in degrees (0 to 180). These limit are enforced,
-		i.e., values are treated as follows:
-			Value									Becomes
-			-----                   				-------
-			< 0					   	   				   0
-			0 - 180					 			value (treated as degrees)
-			181 - 499			   		  			  180
-			500 - (min-1)				   			  min
-		    min-max (from attach or default)	value (treated as microseconds)
-		    (max+1) - 2500			                  max
+        treated as a value in degrees (0 to 180). These limit are enforced,
+        i.e., values are treated as follows:
+            Value                                   Becomes
+            -----                                   -------
+            < 0                                        0
+            0 - 180                             value (treated as degrees)
+            181 - 499                                 180
+            500 - (min-1)                             min
+            min-max (from attach or default)    value (treated as microseconds)
+            (max+1) - 2500                            max
     
-	void writeMicroseconds() - Sets the servo pulse width in microseconds.
-		min and max are enforced (see above). 
+    void writeMicroseconds() - Sets the servo pulse width in microseconds.
+        min and max are enforced (see above). 
     int read() - Gets the last written servo pulse width as an angle between 0 and 180. 
     int readMicroseconds()   - Gets the last written servo pulse width in microseconds.
     bool attached() - Returns true if this servo instance is attached. 
     void detach() - Stops an the attached servo, frees its attached pin, and frees
-		its channel for reuse). 
-	
-	*** New ESP32-specific functions **
-	setTimerWidth(value) - Sets the PWM timer width (must be 16-20) (ESP32 ONLY);
-		as a side effect, the pulse width is recomputed.
-	int readTimerWidth() - Gets the PWM timer width (ESP32 ONLY) 
+        its channel for reuse). 
+    
+    *** ESP32-specific functions **
+    setTimerWidth(value) - Sets the PWM timer width (must be 16-20) (ESP32 ONLY);
+        as a side effect, the pulse width is recomputed.
+    int readTimerWidth() - Gets the PWM timer width (ESP32 ONLY) 
  */
  
 #ifndef ESP32_Servo_h
 #define ESP32_Servo_h
 
 // Values for TowerPro MG995 large servos (and many other hobbyist servos)
-#define DEFAULT_uS_LOW 1000		// 1000us
-#define DEFAULT_uS_HIGH 2000  	// 2000us
+#define DEFAULT_uS_LOW 1000        // 1000us
+#define DEFAULT_uS_HIGH 2000      // 2000us
 
 // Values for TowerPro SG90 small servos
 //#define DEFAULT_uS_LOW 400
@@ -82,10 +82,10 @@
 #define MAX_PULSE_WIDTH      2500     // the longest pulse sent to a servo 
 #define DEFAULT_PULSE_WIDTH  1500     // default pulse width when servo is attached
 #define DEFAULT_PULSE_WIDTH_TICKS 4825
-#define REFRESH_CPS 		   50
-#define REFRESH_USEC 		20000
+#define REFRESH_CPS            50
+#define REFRESH_USEC         20000
 
-#define MAX_SERVOS   		   16	 // no. of PWM channels in ESP32
+#define MAX_SERVOS              16     // no. of PWM channels in ESP32
 
 /*
 * This group/channel/timmer mapping is for information only;
@@ -115,28 +115,30 @@ class Servo
 public:
   Servo();
   // Arduino Servo Library calls
-  int attach(int pin);           // attach the given pin to the next free channel, returns channel number or 0 if failure
+  int attach(int pin);                   // attach the given pin to the next free channel, returns channel number or 0 if failure
   int attach(int pin, int min, int max); // as above but also sets min and max values for writes. 
   void detach();
-  void write(int value);             // if value is < MIN_PULSE_WIDTH its treated as an angle, otherwise as pulse width in microseconds 
-  void writeMicroseconds(int value); // Write pulse width in microseconds 
-  int read();                        // returns current pulse width as an angle between 0 and 180 degrees
-  int readMicroseconds();            // returns current pulse width in microseconds for this servo
-  bool attached();                   // return true if this servo is attached, otherwise false  
+  void write(int value);                 // if value is < MIN_PULSE_WIDTH its treated as an angle, otherwise as pulse width in microseconds 
+  void writeMicroseconds(int value);     // Write pulse width in microseconds 
+  int read();                            // returns current pulse width as an angle between 0 and 180 degrees
+  int readMicroseconds();                // returns current pulse width in microseconds for this servo
+  bool attached();                       // return true if this servo is attached, otherwise false  
+  
   // ESP32 only functions
-  void setTimerWidth(int value);	 // set the PWM timer width (ESP32 ONLY)
-  int readTimerWidth();	 			 // get the PWM timer width (ESP32 ONLY)  
-private: 
+  void setTimerWidth(int value);     // set the PWM timer width (ESP32 ONLY)
+  int readTimerWidth();              // get the PWM timer width (ESP32 ONLY)  
+
+  private: 
    int usToTicks(int usec);
    int ticksToUs(int ticks);
-   static int ServoCount;		 	 // the total number of attached servos
-   static int ChannelUsed[];
-   int servoChannel = 0;             				// channel number for this servo
-   int min = DEFAULT_uS_LOW;                        // minimum pulse width for this servo   
-   int max = DEFAULT_uS_HIGH;                       // maximum pulse width for this servo 
-   int pinNumber = 0;             		 			// GPIO pin assigned to this channel
-   int timer_width = DEFAULT_TIMER_WIDTH;		  	// ESP32 allows variable width PWM timers
-   int ticks = DEFAULT_PULSE_WIDTH_TICKS;		 	// current pulse width on this channel
+   static int ServoCount;                             // the total number of attached servos
+   static int ChannelUsed[];                          // used to track whether a channel is in service
+   int servoChannel = 0;                              // channel number for this servo
+   int min = DEFAULT_uS_LOW;                          // minimum pulse width for this servo   
+   int max = DEFAULT_uS_HIGH;                         // maximum pulse width for this servo 
+   int pinNumber = 0;                                 // GPIO pin assigned to this channel
+   int timer_width = DEFAULT_TIMER_WIDTH;             // ESP32 allows variable width PWM timers
+   int ticks = DEFAULT_PULSE_WIDTH_TICKS;             // current pulse width on this channel
    int timer_width_ticks = DEFAULT_TIMER_WIDTH_TICKS; // no. of ticks at rollover; varies with width
 };
 #endif

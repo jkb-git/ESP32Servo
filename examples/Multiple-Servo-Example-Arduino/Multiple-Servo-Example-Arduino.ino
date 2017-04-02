@@ -46,7 +46,7 @@ int minUs = 500;
 int maxUs = 2400;
 
 // These are all GPIO pins on the ESP32
-// Reccomended pins include 2,4,12-19,21-23,25-27,32-33 
+// Recommended pins include 2,4,12-19,21-23,25-27,32-33 
 int servo1Pin = 18;
 int servo2Pin = 19;
 int servo3Pin = 22;
