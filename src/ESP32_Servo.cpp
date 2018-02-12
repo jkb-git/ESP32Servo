@@ -54,6 +54,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #include "esp32-hal-ledc.h"
 #include "Arduino.h"
 
+//#define ENFORCE_PINS
+
 // initialize the class variable ServoCount
 int Servo::ServoCount = 0;
 
@@ -111,11 +113,13 @@ int Servo::attach(int pin)
 int Servo::attach(int pin, int min, int max)
 {    
     if ((this->servoChannel <= MAX_SERVOS) && (this->servoChannel > 0))
-    { 
-        // Recommend only the following pins 2,4,12-19,21-23,25-27,32-33 (enforcement commented out)
-        //if ((pin == 2) || (pin ==4) || ((pin >= 12) && (pin <= 19)) || ((pin >= 21) && (pin <= 23)) ||
-        //        ((pin >= 25) && (pin <= 27)) || (pin == 32) || (pin == 33))
-        //{
+    {
+#ifdef ENFORCE_PINS
+        // Recommend only the following pins 2,4,12-19,21-23,25-27,32-33
+        if ((pin == 2) || (pin ==4) || ((pin >= 12) && (pin <= 19)) || ((pin >= 21) && (pin <= 23)) ||
+                ((pin >= 25) && (pin <= 27)) || (pin == 32) || (pin == 33))
+        {
+#endif
             // OK to proceed; first check for new/reuse
             if (this->pinNumber < 0) // we are attaching to a new or previously detached pin; we need to initialize/reinitialize
             {
@@ -126,11 +130,13 @@ int Servo::attach(int pin, int min, int max)
                 this->timer_width_ticks = pow(2,this->timer_width);
             }
             this->pinNumber = pin;
-        //}
-        //else
-        //{
-        //    return 0;
-        //}
+#ifdef ENFORCE_PINS
+        }
+        else
+        {
+            return 0;
+        }
+#endif
 
         // min/max checks 
         if (min < MIN_PULSE_WIDTH)          // ensure pulse width is valid
@@ -142,7 +148,8 @@ int Servo::attach(int pin, int min, int max)
         // Set up this channel
         // if you want anything other than default timer width, you must call setTimerWidth() before attach
         ledcSetup(this->servoChannel, REFRESH_CPS, this->timer_width); // channel #, 50 Hz, timer width
-        ledcAttachPin(this->pinNumber, this->servoChannel);   // GPIO pin assigned to channel        
+        ledcAttachPin(this->pinNumber, this->servoChannel);   // GPIO pin assigned to channel    
+        return 1;
     }
     else return 0;  
 }
@@ -229,11 +236,11 @@ void Servo::setTimerWidth(int value)
     // if positive multiply by diff; if neg, divide
     if (widthDifference > 0)
     {
-        this->ticks << widthDifference;
+        this->ticks <<= widthDifference;
     }
     else
     {
-        this->ticks >> widthDifference;
+        this->ticks >>= widthDifference;
     }
     
     this->timer_width = value;
